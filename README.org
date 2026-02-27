@@ -25,10 +25,14 @@ and pointer overflow.
   + TODO: Let the user set the tape length at start-time and add a
     check for "tape-overflow"
 
-** Build/run Instruction
+** Implementation
 
 I'm doing this implementation using SBCL using Emacs/Slime. Since it's
 a basic implementation and doesn't need external dependencies this
 should be unimportant
+
+** Usage
+
+TODO: Add instructions and how to here
 
 
