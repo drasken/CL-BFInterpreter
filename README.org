@@ -1,0 +1,34 @@
+* Simple CommonLisp BF Interpreter
+
+** Goal
+
+My primary goal was to make this simple interpreter to learn coding
+better using Lisp in general and CommonLisp in particular while making
+something "functional" (first version will be just a toy project) even
+if simple
+
+** Project
+
+A minimal Brainfuck interpreter that runs .bf programs from a file or
+stdin and prints output to stdout. It implements the eight Brainfuck
+commands (>, <, +, -, ., ,, [, ]) using a configurable(TODO) tape
+(default 30,000 cells) and simple error checks for unmatched brackets
+and pointer overflow.
+
+*** General implementation choices
+
+- The basic data structures are saved as global variables.
+  + TODO: Late interpreter state in a struct /state/
+- Pre-preparsing the source code to make an-hash table for better
+  managing jumping instructions
+- Initially I'm setting the default tape length at 30000.
+  + TODO: Let the user set the tape length at start-time and add a
+    check for "tape-overflow"
+
+** Build/run Instruction
+
+I'm doing this implementation using SBCL using Emacs/Slime. Since it's
+a basic implementation and doesn't need external dependencies this
+should be unimportant
+
+
