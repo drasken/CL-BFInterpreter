@@ -33,7 +33,11 @@ should be unimportant
 
 ** Usage
 
-The code is intended to run as a script, passing the file name as
-input. Since it's just a toy-project here is just a simple
-file-exists-p check and a null args check
+Run as binary after compiling it using 
+#+BEGIN_SRC
+sbcl --eval '(asdf:make :bf-interpreter)' --quit
+#+END_SRC
+
+than use it with ./bf-int <file-name>
+
 
