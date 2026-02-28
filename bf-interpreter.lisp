@@ -54,16 +54,10 @@
 	(stack '()))  ; temporary stack to use while looping
     (loop for x across code-string
 	  for y from 0 do (case x
-			    (#\[ (push y stack))  ;; find the [
+			    (#\[ (push y stack))  ;; found the [
 			    (#\] (let ((k (pop stack)))  ; get the [ index
 				   (setf (gethash y jump-table) k)
-				   (setf (gethash k jump-table) y)))) )  ; added last parens
-			         ;; OLD CODE
-			         ;; ((lambda (k)
-				 ;;   (progn
-				 ;;     (setf (gethash y jump-table) k)
-				 ;;     (setf (gethash k jump-table) y)))
-				 ;;  (pop stack)))))
+				   (setf (gethash k jump-table) y)))))  ; added last parens
     ;; TODO: Here add an check, if stack not nil rise error else return jump table
     jump-table))
 
@@ -100,7 +94,8 @@
       (#\- (decf (aref (bf-state-array state) (bf-state-a-counter state)))) 
       ;; Instructions to read or print cell values
       (#\. (write-char (code-char current-cell-value)))
-      (#\, (setf (aref (bf-state-array state) (bf-state-a-counter state)) (mod (read) 256)))
+      (#\, (setf (aref (bf-state-array state) (bf-state-a-counter state))
+		 (char-code (read-char))))
       ;; Instructions to move array pointer by +1 or -1
       (#\< (if (> (bf-state-a-counter state) 0) (decf (bf-state-a-counter state)) 0))
       (#\> (incf (bf-state-a-counter state)))  ; TODO: add check or data chenge data structure
