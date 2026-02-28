@@ -57,7 +57,7 @@
 			    (#\[ (push y stack))  ;; find the [
 			    (#\] (let ((k (pop stack)))  ; get the [ index
 				   (setf (gethash y jump-table) k)
-				   (setf (gethash k jump-table) y))))
+				   (setf (gethash k jump-table) y)))) )  ; added last parens
 			         ;; OLD CODE
 			         ;; ((lambda (k)
 				 ;;   (progn
@@ -65,7 +65,7 @@
 				 ;;     (setf (gethash k jump-table) y)))
 				 ;;  (pop stack)))))
     ;; TODO: Here add an check, if stack not nil rise error else return jump table
-    jump-table)))
+    jump-table))
 
 
 ;; TEST
@@ -93,25 +93,25 @@
    - Instruction is a character in this set |8|: < > + - . , [ ]
    - State is a struct of type bf-state
 "
-  (case instruction  ; each instruction it's associated to a certain character
-    ;; TODO: Add each instruction code
-    (#\+ (setf (aref (bf-state-array state) (bf-state-a-counter state))
-	       (1+  (aref (bf-state-array state) (bf-state-a-counter state)))))
-    (#\- (setf (aref (bf-state-array state) (bf-state-a-counter state))
-	       (1-  (aref (bf-state-array state) (bf-state-a-counter state)))))
-    ;; This manage the outp+ut. Using mod 255 to limit range to ASCII code
-    (#\. (write-char (mod (aref (bf-state-array state) (bf-state-a-counter state)) 256))
-    ;; This manage the input code, read from terminal and store the number in the array
-   (#\, (setf (aref (bf-state-array state) (bf-state-a-counter)) (mod (read) 256)))
-   (#\< (if (> (bf-state-a-counter state) 0)
-	     (decf (bf-state-a-counter state)) 0))  ; OLD (1- (bf-state-a-counter state)))
-   (#\> (incf (bf-state-a-counter state)))  ; OLD (1+ (bf-state-a-counter state))))
-   ;; (#\[ )
-   ;; (#\] )
-  )))  
-
-
-
+  (let ((current-cell-value (aref (bf-state-array state) (bf-state-a-counter state))))
+    (case instruction  ; each instruction it's associated to a certain character
+      ;; Instructions to Increment or decrement cells value
+      (#\+ (incf (aref (bf-state-array state) (bf-state-a-counter state)))) 
+      (#\- (decf (aref (bf-state-array state) (bf-state-a-counter state)))) 
+      ;; Instructions to read or print cell values
+      (#\. (write-char (code-char current-cell-value)))
+      (#\, (setf (aref (bf-state-array state) (bf-state-a-counter state)) (mod (read) 256)))
+      ;; Instructions to move array pointer by +1 or -1
+      (#\< (if (> (bf-state-a-counter state) 0) (decf (bf-state-a-counter state)) 0))
+      (#\> (incf (bf-state-a-counter state)))  ; TODO: add check or data chenge data structure
+      ;; Instructions implementing the jumps
+      (#\[ (when (zerop current-cell-value)
+             (setf (bf-state-p-counter state) 
+                   (gethash (bf-state-p-counter state) (bf-state-jump-table state)))))
+      (#\] (unless (zerop current-cell-value)
+             ;; Jump backward to the matching [
+             (setf (bf-state-p-counter state) 
+                   (gethash (bf-state-p-counter state) (bf-state-jump-table state))))))))
 
 
   
