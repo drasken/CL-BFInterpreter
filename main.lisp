@@ -6,7 +6,7 @@
 
 
 ;; File to read as test. Hardcoded for the moment.
-(defparameter input-file  "./repeat.bf")
+(defparameter *input-file* "./repeat.bf")
 
 
 (defun run-interpreter (source)

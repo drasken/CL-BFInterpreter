@@ -55,11 +55,15 @@
     (loop for x across code-string
 	  for y from 0 do (case x
 			    (#\[ (push y stack))  ;; found the [
-			    (#\] (let ((k (pop stack)))  ; get the [ index
-				   (setf (gethash y jump-table) k)
-				   (setf (gethash k jump-table) y)))))  ; added last parens
-    ;; TODO: Here add an check, if stack not nil rise error else return jump table
-    jump-table))
+			    (#\] (if (null stack)  ; check if there is a corresponding [ indexed
+				     (error "Syntax Error: Unmatched ']' at position ~A" y)
+				     (let ((k (pop stack)))
+				       (setf (gethash y jump-table) k)
+				       (setf (gethash k jump-table) y)))))
+          ;; After executing all the loop, return the jump-table
+          finally (if (not (null stack))  ; Check if all [ had a matching ]
+                      (error "Syntax Error: Unmatched '[' at positions ~A" stack)
+                      (return jump-table)))))
 
 
 ;; TEST
@@ -87,26 +91,39 @@
    - Instruction is a character in this set |8|: < > + - . , [ ]
    - State is a struct of type bf-state
 "
-  (let ((current-cell-value (aref (bf-state-array state) (bf-state-a-counter state))))
+  ;; Get the state field values here for better accessibility
+  (let* ((tape (bf-state-array state))
+         (a-ptr (bf-state-a-counter state))
+         (p-ptr (bf-state-p-counter state))
+         (current-val (aref tape a-ptr)))
     (case instruction  ; each instruction it's associated to a certain character
       ;; Instructions to Increment or decrement cells value
-      (#\+ (incf (aref (bf-state-array state) (bf-state-a-counter state)))) 
-      (#\- (decf (aref (bf-state-array state) (bf-state-a-counter state)))) 
+      (#\+ (setf (aref tape a-ptr) (mod (1+ (aref tape a-ptr)) 256)))
+      (#\- (setf (aref tape a-ptr) (mod (1- (aref tape a-ptr)) 256)))
+      ;;OLD CODE
+      ;; (#\+ (if (= a-ptr 255) 0 (incf (aref tape a-ptr))))
+      ;; (#\- (if (= a-ptr 0) 255 (decf (aref tape a-ptr))))
       ;; Instructions to read or print cell values
-      (#\. (write-char (code-char current-cell-value)))
-      (#\, (setf (aref (bf-state-array state) (bf-state-a-counter state))
-		 (char-code (read-char))))
+      (#\. (progn
+             (write-char (code-char current-val))
+             (finish-output))) ;; Critical: Forces the character to show in terminal
+      (#\, (setf (aref tape a-ptr)
+                 (char-code (read-char)))) ;; Pauses and waits for user keyboard input
       ;; Instructions to move array pointer by +1 or -1
-      (#\< (if (> (bf-state-a-counter state) 0) (decf (bf-state-a-counter state)) 0))
-      (#\> (incf (bf-state-a-counter state)))  ; TODO: add check or data chenge data structure
+      (#\< (if (> a-ptr 0)
+               (decf (bf-state-a-counter state))
+               (error "Pointer Underflow: Attempted to move pointer below 0")))
+      (#\> (if (< a-ptr (1- (length tape)))
+	       (incf (bf-state-a-counter state))
+	       (error "Pointer Overflow: Attempted to point past length: ~A" (length tape))))
       ;; Instructions implementing the jumps
-      (#\[ (when (zerop current-cell-value)
-             (setf (bf-state-p-counter state) 
-                   (gethash (bf-state-p-counter state) (bf-state-jump-table state)))))
-      (#\] (unless (zerop current-cell-value)
-             ;; Jump backward to the matching [
-             (setf (bf-state-p-counter state) 
-                   (gethash (bf-state-p-counter state) (bf-state-jump-table state))))))))
+      (#\[ (when (zerop current-val)
+             (setf (bf-state-p-counter state)
+                   (gethash p-ptr (bf-state-jump-table state)))))
+      (#\] (unless (zerop current-val)
+	     ;; Jump backward to the matching [
+             (setf (bf-state-p-counter state)
+                   (gethash p-ptr (bf-state-jump-table state))))))))
 
 
   

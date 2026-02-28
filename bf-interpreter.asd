@@ -4,7 +4,12 @@
   :license "BSD"
   :version "0.1"
   :serial t
+  ;; Binary building instructions START
+  :build-operation "program-op"
+  :build-pathname "bf-int"
+  :entry-point "bf-interpreter:main"
+  ; Binary building instructions END
   :depends-on (#:uiop)
   :components ((:file "package")
-	       (:file "main")
-	       (:file "bf-interpreter")))
+	       (:file "bf-interpreter")
+	       (:file "main")))

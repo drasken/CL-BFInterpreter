@@ -33,6 +33,7 @@ should be unimportant
 
 ** Usage
 
-TODO: Add instructions and how to here
-
+The code is intended to run as a script, passing the file name as
+input. Since it's just a toy-project here is just a simple
+file-exists-p check and a null args check
 
